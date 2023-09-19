@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* 共通のスタイル */
+      body, input, textarea, button {
+        font-family: "YuGothic", "游ゴシック", "Yu Gothic", sans-serif;
+      }
+  
+      /* ボタンのスタイル */
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        background-color: #6667ab;
+        color: #ffffff;
+        cursor: pointer;
+        margin-top: 10px;
+        border-radius: 5px;
+      }
+  
+      button:hover {
+        background-color: #363767;
+      }
+  
+      /* テキストエリアとテキストフィールドのスタイル */
+      textarea, input[type="text"] {
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        width:90%;
+      }
+  
+      textarea {
+        height: 150px;
+      }
+  
+      /* ラベルとコンテナのスタイル */
+      p {
+        margin-bottom: 5px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+  
+      div#template {
+        padding: 20px;
+        border: 1px solid #5b5a5a;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <button onclick="generateReport()">出勤報告メール生成</button>
+
+    <p>名前を入力してください:</p>
+    <input type="text" id="userName" placeholder="名前">
+  
+    <p>宛先を入力してください:</p>
+    <input type="text" id="recipients" placeholder="宛先 (例: example@example.com)">
+  
+    <p>作業内容を入力してください:</p>
+    <textarea id="workContent" placeholder="今日の作業内容"></textarea>
+    <p>メールテンプレート:</p>
+    <div id="template"></div>
+<!-- ----------------------------------------------------------------------------------------- -->
+<script>
+  // ページがロードされた時点でLocalStorageから作業内容、名前、宛先を読み込む
+  window.onload = function() {
+    const savedWorkContent = localStorage.getItem('savedWorkContent');
+    const savedUserName = localStorage.getItem('savedUserName');
+    const savedRecipients = localStorage.getItem('savedRecipients');
+
+    if (savedWorkContent) {
+      document.getElementById('workContent').value = savedWorkContent;
+    }
+    if (savedUserName) {
+      document.getElementById('userName').value = savedUserName;
+    }
+    if (savedRecipients) {
+      document.getElementById('recipients').value = savedRecipients;
+    }
+  };
+
+  function generateReport() {
+    const workContent = document.getElementById('workContent').value;
+    const userName = document.getElementById('userName').value;
+    const recipients = document.getElementById('recipients').value;
+
+    // 作業内容、名前、宛先をLocalStorageに保存
+    localStorage.setItem('savedWorkContent', workContent);
+    localStorage.setItem('savedUserName', userName);
+    localStorage.setItem('savedRecipients', recipients);
+
+    const formattedDate = FormattedDate();
+    const title = `${formattedDate}リモートワーク作業報告`;
+
+    const body = `お疲れ様です。
+${userName}です。
+
+本日9時00分出勤致しました。
+作業内容は、
+${workContent}
+です。
+
+以上宜しくお願いします。
+    `;
+
+    const formattedBody = body.replace(/\n/g, '<br>');
+    document.getElementById('template').innerHTML = formattedBody;
+    const emailBody = encodeURIComponent(body);
+    window.open(`mailto:${recipients}?subject=${title}&body=${emailBody}`);
+  }
+
+  function FormattedDate() {
+    const dateObject = new Date();
+    const month = dateObject.getMonth() + 1;
+    const day = dateObject.getDate();
+    return `${month}月${day}日`;
+  }
+</script>
+<!-- ----------------------------------------------------------------------------------------- -->
+  </body>
+</html>
